@@ -19,20 +19,20 @@ var hashMethods = {
     registerPassword: getHash,
     forgottenPassword: getHash,
     newPassword: getHash,
-    bio: function (values, hashData) {
+    bio: function(values, hashData) {
         // values - array like: [{finger: "L1", templates: ["RRMNDKSF...]}, {finger: "L2", templates: ["RRMNDKSF...]}].
         // where finger could be one of 'L1', 'L2', 'L3', 'L4', 'L5', 'R1', 'R2', 'R3', 'R4', 'R5'
         // Joi validations validates that
         var mappedBioData = {};
         var successDataResponse = [];
-        values.forEach(function (val) {
+        values.forEach(function(val) {
             mappedBioData[val.finger] = val.templates;
             successDataResponse.push(val.finger);
         });
 
         // Validate output object
         if (Object.keys(mappedBioData).length === 0) {
-            return new Promise(function (resolve, reject) {
+            return new Promise(function(resolve, reject) {
                 resolve(['']);
             });
         }
@@ -62,30 +62,30 @@ var hashMethods = {
         }
 
         return Promise.all(bioCheckPromises)
-            .then(function (r) {
+            .then(function(r) {
                 return successDataResponse;
             })
-            .catch(function (r) {
+            .catch(function(r) {
                 return [''];
             });
     }
 };
-var otpValidate = function (msg, $meta) {
+var otpValidate = function(msg, $meta) {
     $meta.method = 'user.hash.return';
     return importMethod($meta.method)({
         identifier: msg.username,
         type: msg.type
-    }, $meta).then(function (response) {
+    }, $meta).then(function(response) {
         if (!response.hashParams) {
             throw errors['identity.notFound']();
         }
         return hashMethods.otp(msg.otp, response.hashParams);
-    }).then(function (otp) {
+    }).then(function(otp) {
         msg.otp = otp;
         $meta.method = 'user.identity.passwordChange';
         return importMethod($meta.method)(msg, $meta);
     }).catch(handleError);
-}
+};
 /**
  * Validates password against user Access policy. E.g. Passowrd lenght and required symbols (lower case, special symbol, etc.)
  * @param {newPasswordRaw} plain new password
@@ -105,13 +105,13 @@ var otpValidate = function (msg, $meta) {
  */
 function validateNewPasswordAgainstAccessPolicy(newPasswordRaw, passwordCredentaislGetStoreProcedureParams, $meta, actorId) {
     // There are cases iwhere we passes the current hashed password => no need to hash it
-    var hashPassword = new Promise(function (resolve, reject) {
+    var hashPassword = new Promise(function(resolve, reject) {
         if (passwordCredentaislGetStoreProcedureParams.requiresPassHash) {
             var hashParams = passwordCredentaislGetStoreProcedureParams.hashParams;
             var password = passwordCredentaislGetStoreProcedureParams.password;
             if (hashParams && password) {
                 utUserHelpers.genHash(password, JSON.parse(hashParams.params))
-                    .then(function (hashedPassword) {
+                    .then(function(hashedPassword) {
                         resolve(hashedPassword);
                     });
             } else {
@@ -123,14 +123,14 @@ function validateNewPasswordAgainstAccessPolicy(newPasswordRaw, passwordCredenta
     });
 
     return hashPassword
-        .then(function (hashedPassword) {
+        .then(function(hashedPassword) {
             var policyPasswordCredentalsGetParams = {
                 username: passwordCredentaislGetStoreProcedureParams.username,
                 type: passwordCredentaislGetStoreProcedureParams.type,
                 password: hashedPassword
             };
             return importMethod('policy.passwordCredentials.get')(policyPasswordCredentalsGetParams)
-                .then(function (policyResult) {
+                .then(function(policyResult) {
                     // Validate password policy
                     var passwordCredentials = policyResult['passwordCredentials'][0];
                     var isPasswordValid = utUserHelpers.isParamValid(newPasswordRaw, passwordCredentials);
@@ -183,7 +183,7 @@ function validateNewPasswordAgainstAccessPolicy(newPasswordRaw, passwordCredenta
                         return importMethod('core.itemTranslation.fetch')({
                             itemTypeName: 'regexInfo',
                             languageId: 1 // the languageId should be passed by the UI, it should NOT be the user default language becase the UI can be in english and the default user language might be france
-                        }, $meta).then(function (translationResult) {
+                        }, $meta).then(function(translationResult) {
                             var printMessage = helpers.buildPolicyErrorMessage(translationResult.itemTranslationFetch, passwordCredentials.regexInfo, passwordCredentials.charMin, passwordCredentials.charMax);
                             var invalidNewPasswordError = errors['identity.term.invalidNewPassword'](printMessage);
                             invalidNewPasswordError.message = printMessage;
@@ -194,7 +194,7 @@ function validateNewPasswordAgainstAccessPolicy(newPasswordRaw, passwordCredenta
         });
 }
 
-var handleError = function (err) {
+var handleError = function(err) {
     if (typeof err.type === 'string') {
         if (
             err.type === 'policy.term.checkBio' ||
@@ -234,12 +234,12 @@ var handleError = function (err) {
 };
 
 module.exports = {
-    init: function (b) {
+    init: function(b) {
         importMethod = b.importMethod.bind(b);
         checkMethod = b.config['identity.check'];
         debug = b.config.debug;
     },
-    registerRequest: function (msg, $meta) {
+    registerRequest: function(msg, $meta) {
         var password = Math.floor(1000 + Math.random() * 9000) + '';
         var data = {};
         var result = {};
@@ -254,17 +254,17 @@ module.exports = {
                 type: 'registerPassword',
                 identifier: msg.username
             }
-        ).then(function (passwordHash) {
+        ).then(function(passwordHash) {
             msg.hash = passwordHash;
             return importMethod('user.identity.registerClient')(msg);
-        }).then(function (identity) {
+        }).then(function(identity) {
             if (!identity.phone || !identity.phone.phoneNumber) {
                 throw errors['identity.notFound']();
             }
             data.identity = identity;
             return;
         }));
-        return Promise.all(promises).then(function () {
+        return Promise.all(promises).then(function() {
             var customerMessage = {
                 // This data comes from flow 1
                 port: data.identity.phone.mnoKey,
@@ -283,19 +283,19 @@ module.exports = {
                 },
                 method: 'alert.message.send'
             }));
-        }).then(function () {
+        }).then(function() {
             if (debug) {
                 result.otp = password;
             }
             return result;
         }).catch(handleError);
     },
-    registerValidate: function (msg, $meta) {
+    registerValidate: function(msg, $meta) {
         msg.otp = msg.registerPassword;
         msg.type = 'registerPassword';
         return otpValidate(msg, $meta);
     },
-    check: function (msg, $meta) {
+    check: function(msg, $meta) {
         delete msg.type;
         var creatingSession = false;
         var get;
@@ -309,11 +309,11 @@ module.exports = {
             }
 
             get = importMethod($meta.method)(msg, $meta)
-                .then(function (result) {
+                .then(function(result) {
                     if (!result.hashParams) {
                         throw errors['identity.hashParams']();
                     }
-                    var hashData = result.hashParams.reduce(function (all, record) {
+                    var hashData = result.hashParams.reduce(function(all, record) {
                         all[record.type] = record;
                         msg.actorId = record.actorId;
                         return all;
@@ -325,18 +325,18 @@ module.exports = {
 
                     return Promise.all(
                         Object.keys(hashMethods)
-                            .filter(function (method) {
+                            .filter(function(method) {
                                 return hashData[method] && msg[method];
                             })
-                            .map(function (method) {
+                            .map(function(method) {
                                 return hashMethods[method](msg[method], hashData[method])
-                                    .then(function (value) {
+                                    .then(function(value) {
                                         msg[method] = value;
                                         return;
                                     });
                             })
                     )
-                        .then(function () {
+                        .then(function() {
                             return msg;
                         });
                 });
@@ -347,7 +347,7 @@ module.exports = {
             }
 
             // Validate new password access policy
-            get = Promise.all([get]).then(function () {
+            get = Promise.all([get]).then(function() {
                 var rawNewPassword = arguments[0][0]['newPasswordRaw'];
                 var okReturn = arguments[0][0];
 
@@ -392,7 +392,7 @@ module.exports = {
                 type: 'password'
             });
 
-            get = Promise.all([get, hash]).then(function () {
+            get = Promise.all([get, hash]).then(function() {
                 var r = arguments[0][0];
                 var hash = arguments[0][1];
                 if (msg.hasOwnProperty('forgottenPassword')) {
@@ -416,7 +416,7 @@ module.exports = {
                     otp: r.otp,
                     type: r.type,
                     hash: r.hash
-                }).then(function () {
+                }).then(function() {
                     r.password = r.hash.value;
                     delete r.registerPassword;
                     delete r.forgottenPassword;
@@ -427,10 +427,10 @@ module.exports = {
         }
 
         return get
-            .then(function (r) {
+            .then(function(r) {
                 $meta.method = checkMethod || 'user.identity.checkPolicy';
                 return importMethod($meta.method)(r, $meta)
-                    .then(function (user) {
+                    .then(function(user) {
                         if ((!user.loginPolicy || !user.loginPolicy.length) && !user['permission.get']) { // in case user.identity.check did not return the permissions
                             $meta.method = 'permission.get';
                             return importMethod($meta.method)({ actionId: msg.actionId },
@@ -442,7 +442,7 @@ module.exports = {
                         }
                         return user;
                     });
-            }).then(function (response) {
+            }).then(function(response) {
                 if (creatingSession && response.roles.some((role) => role.name === 'BaobabClientApplication')) {
                     return importMethod('customer.activityReport.add')({
                         activity: {
@@ -453,20 +453,20 @@ module.exports = {
                             channel: 'online'
                         }
                     }, {
-                            auth: {
-                                actorId: response['identity.check'].actorId
-                            }
-                        }).then(() => response);
+                        auth: {
+                            actorId: response['identity.check'].actorId
+                        }
+                    }).then(() => response);
                 }
                 return response;
             })
             .catch(handleError);
     },
-    closeSession: function (msg, $meta) {
+    closeSession: function(msg, $meta) {
         $meta.method = 'user.session.delete';
         return importMethod($meta.method)({ sessionId: $meta.auth.sessionId }, $meta);
     },
-    changePassword: function (msg, $meta) {
+    changePassword: function(msg, $meta) {
         $meta.method = 'user.identity.get';
         return importMethod($meta.method)({
             userId: $meta.auth.actorId,
@@ -490,7 +490,7 @@ module.exports = {
             })
             .catch(handleError);
     },
-    forgottenPasswordRequest: function (msg, $meta) {
+    forgottenPasswordRequest: function(msg, $meta) {
         // Use or to enum all possible channels here
         if (msg.channel !== 'sms' && msg.channel !== 'email') {
             throw errors['identity.notFound']();
@@ -499,7 +499,7 @@ module.exports = {
         return importMethod($meta.method)({
             username: msg.username,
             type: 'password'
-        }).then(function (hash) {
+        }).then(function(hash) {
             if (!hash || !Array.isArray(hash.hashParams) || hash.hashParams.length < 1 || !hash.hashParams[0] || !hash.hashParams[0].actorId) {
                 throw errors['identity.notFound']();
             }
@@ -510,7 +510,7 @@ module.exports = {
                 type: 'forgottenPassword',
                 template: 'user.forgottenPassword.otp',
                 actorId: actorId
-            }).then(function (result) {
+            }).then(function(result) {
                 if (Array.isArray(result) && result.length >= 1 && Array.isArray(result[0]) && result[0].length >= 1 && result[0][0] && result[0][0].success) {
                     return {
                         sent: true
@@ -520,20 +520,20 @@ module.exports = {
             });
         }).catch(handleError);
     },
-    forgottenPasswordValidate: function (msg, $meta) {
+    forgottenPasswordValidate: function(msg, $meta) {
         msg.otp = msg.forgottenPassword;
         msg.type = 'forgottenPassword';
         return otpValidate(msg, $meta);
     },
-    forgottenPassword: function (msg, $meta) {
+    forgottenPassword: function(msg, $meta) {
         $meta.method = 'user.identity.get';
-        var hashType = function (key, type, ErrorWhenNotFound) {
+        var hashType = function(key, type, ErrorWhenNotFound) {
             return importMethod($meta.method)({
                 username: msg.username,
                 type: type
-            }, $meta).then(function (response) {
+            }, $meta).then(function(response) {
                 var hashParams;
-                response.hashParams.some(function (h) {
+                response.hashParams.some(function(h) {
                     if (h.type === type) {
                         hashParams = h;
                         return true;
@@ -554,7 +554,7 @@ module.exports = {
         return Promise.all([
             hashType('forgottenPassword', 'forgottenPassword', errors['identity.notFound']()),
             hashType('newPassword', 'password', null)
-        ]).then(function (p) {
+        ]).then(function(p) {
             msg.forgottenPassword = p[0];
             msg.newPassword = p[1];
             $meta.method = 'user.identity.forgottenPasswordChange';
