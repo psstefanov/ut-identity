@@ -240,54 +240,28 @@ module.exports = {
         debug = b.config.debug;
     },
     registerRequest: function(msg, $meta) {
-        var password = Math.floor(1000 + Math.random() * 9000) + '';
-        var data = {};
+        // get actorId and sendOtp
         var result = {};
-        var promises = [];
-        // We have following flows in registration request:
-        // 1. Registration flow (independent) - Create a password, hash it, try find/create/replace user.hash
-        // 2. Template flow (independent) - Load a template to send SMS/email to user.
-        // 3. Message flow (depends on 1 and 2) - If registration is successful and we have template, enqueue message to customer.
-        promises.push(importMethod('user.getHash')(
-            {
-                value: password,
+        $meta.method = 'user.identity.registerClient';
+        return importMethod($meta.method)(msg)
+        .then(function(identity) {
+            var actorId = identity.customer.actorId;
+            $meta.method = 'user.sendOtp';
+            return importMethod($meta.method)({
+                channel: msg.channel,
                 type: 'registerPassword',
-                identifier: msg.username
-            }
-        ).then(function(passwordHash) {
-            msg.hash = passwordHash;
-            return importMethod('user.identity.registerClient')(msg);
-        }).then(function(identity) {
-            if (!identity.phone || !identity.phone.phoneNumber) {
-                throw errors['identity.notFound']();
-            }
-            data.identity = identity;
-            return;
-        }));
-        return Promise.all(promises).then(function() {
-            var customerMessage = {
-                // This data comes from flow 1
-                port: data.identity.phone.mnoKey,
-                recipient: data.identity.phone.phoneNumber,
                 template: 'customer.self.registration.otp',
-                data: {
-                    firstName: data.identity.person.firstName,
-                    hash: password
-                },
-                languageCode: msg.language,
-                priority: 1
-            };
-            return importMethod('alert.message.send')(customerMessage, assign({}, $meta, {
-                auth: {
-                    actorId: data.identity.customer.actorId
-                },
-                method: 'alert.message.send'
-            }));
-        }).then(function() {
-            if (debug) {
-                result.otp = password;
+                actorId: actorId,
+                username: msg.username
+            });
+        }).then(function(r) {
+            if (Array.isArray(r) && r.length >= 1 && Array.isArray(r[0]) && r[0].length >= 1 && r[0][0] && r[1][0].success) {
+                if (debug) {
+                    result.otp = r[0][0].otp;
+                }
+                return result;
             }
-            return result;
+            throw errors['identity.notFound']();
         }).catch(handleError);
     },
     registerValidate: function(msg, $meta) {
@@ -495,6 +469,7 @@ module.exports = {
         if (msg.channel !== 'sms' && msg.channel !== 'email') {
             throw errors['identity.notFound']();
         }
+        // get actorId and sendOtp
         $meta.method = 'user.identity.get';
         return importMethod($meta.method)({
             username: msg.username,
@@ -511,10 +486,14 @@ module.exports = {
                 template: 'user.forgottenPassword.otp',
                 actorId: actorId
             }).then(function(result) {
-                if (Array.isArray(result) && result.length >= 1 && Array.isArray(result[0]) && result[0].length >= 1 && result[0][0] && result[0][0].success) {
-                    return {
-                        sent: true
-                    };
+                if (Array.isArray(result) && result.length >= 1 && Array.isArray(result[0]) && result[0].length >= 1 && result[0][0] && result[1][0].success) {
+                    if (debug) {
+                        return result[0][0];
+                    } else {
+                        return {
+                            sent: true
+                        };
+                    }
                 }
                 throw errors['identity.notFound']();
             });
