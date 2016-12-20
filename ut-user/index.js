@@ -1,4 +1,3 @@
-var assign = require('lodash.assign');
 var errors = require('../errors');
 var helpers = require('./helpers');
 var utUserHelpers = require('ut-user/helpers');
