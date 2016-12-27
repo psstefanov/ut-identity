@@ -1,3 +1,83 @@
+<a name="5.10.35"></a>
+## [5.10.35](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.34...v5.10.35) (2016-12-23)
+
+
+### Bug Fixes
+
+* version bump ([6e3c3fb](https://github.com/softwaregroup-bg/ut-identity/commit/6e3c3fb))
+
+
+
+<a name="5.10.34"></a>
+## [5.10.34](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.33...v5.10.34) (2016-12-23)
+
+
+### Bug Fixes
+
+* update dependencies ([4942c8a](https://github.com/softwaregroup-bg/ut-identity/commit/4942c8a))
+
+
+
+<a name="5.10.33"></a>
+## [5.10.33](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.32...v5.10.33) (2016-12-20)
+
+
+
+<a name="5.10.32"></a>
+## [5.10.32](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.31...v5.10.32) (2016-12-20)
+
+
+
+<a name="5.10.31"></a>
+## [5.10.31](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.30...v5.10.31) (2016-12-20)
+
+
+
+<a name="5.10.30"></a>
+## [5.10.30](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.29...v5.10.30) (2016-12-20)
+
+
+
+<a name="5.10.29"></a>
+## [5.10.29](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.28...v5.10.29) (2016-12-19)
+
+
+
+<a name="5.10.28"></a>
+## [5.10.28](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.27...v5.10.28) (2016-12-19)
+
+
+
+<a name="5.10.27"></a>
+## [5.10.27](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.26...v5.10.27) (2016-12-16)
+
+
+
+<a name="5.10.26"></a>
+## [5.10.26](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.25...v5.10.26) (2016-12-16)
+
+
+
+<a name="5.10.25"></a>
+## [5.10.25](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.24...v5.10.25) (2016-12-15)
+
+
+
+<a name="5.10.24"></a>
+## [5.10.24](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.23...v5.10.24) (2016-12-15)
+
+
+
+<a name="5.10.23"></a>
+## [5.10.23](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.22...v5.10.23) (2016-12-15)
+
+
+### Bug Fixes
+
+* deps versions bump ([0e85cec](https://github.com/softwaregroup-bg/ut-identity/commit/0e85cec))
+
+
+
 <a name="5.10.22"></a>
 ## [5.10.22](https://github.com/softwaregroup-bg/ut-identity/compare/v5.10.21...v5.10.22) (2016-12-07)
 

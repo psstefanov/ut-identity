@@ -1,6 +1,6 @@
 {
   "name": "ut-identity",
-  "version": "5.10.22",
+  "version": "5.10.35",
   "description": "UT authentication module",
   "main": "index.js",
   "directories": {
@@ -32,16 +32,16 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
-    "blue-tape": "0.2.0",
-    "ut-tools": "^5.10.8"
+    "blue-tape": "1.0.0",
+    "ut-tools": "^5.11.1"
   },
   "dependencies": {
     "ut-error": "^5.3.16",
-    "joi": "10.0.1",
+    "joi": "10.0.6",
     "lodash.assign": "4.2.0",
     "lodash.defaults": "4.2.0",
-    "ut-template": "~5.4.5",
-    "ut-user": "^5.28.19",
+    "ut-template": "~5.5.0",
+    "ut-user": "^6.0.6",
     "when": "3.7.7"
   }
 }
