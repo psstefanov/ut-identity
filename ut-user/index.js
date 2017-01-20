@@ -1,7 +1,7 @@
 var UtIdentityHelpers = require('./helpers');
 var assign = require('lodash.assign');
 var errors = require('../errors');
-// var UtCrypt = require('ut-core/crypt');
+var UtCrypt = require('ut-core/crypt');
 
 var helpers;
 var crypt;
@@ -11,8 +11,7 @@ var debug;
 
 function getCrypt(cryptKey) {
     if (!crypt) {
-        // crypt = new UtCrypt({cryptParams: {password: cryptKey}});
-        crypt = undefined;
+        crypt = new UtCrypt({cryptParams: {password: cryptKey}});
     }
     return crypt;
 }

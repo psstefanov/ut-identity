@@ -210,12 +210,7 @@ function parseBioTemplates(stringifyTemplates, crypt) {
 
     var templates = JSON.parse(stringifyTemplates);
     for (var finger in templates) {
-        var template;
-        if (crypt) {
-            template = crypt.decrypt(templates[finger]);
-        } else {
-            template = templates[finger];
-        }
+        var template = crypt.decrypt(templates[finger]);
 
         var currentObject = {
             id: finger,
